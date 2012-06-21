@@ -68,13 +68,13 @@ It's generally a good practice to define a custom account to access the database
 provided by OpenShift, so we'll create the database and user to be used by the application, according to the
 conf/openshift.conf file.
 
-Click on *databases*, *Create New Database", and enter *polls* as database name.
+Click on *databases*, *Create New Database*, and enter *polls* as database name.
 
-Now click on the *polls* database on the left side of the screen, then click on *More", *Authentication*.
+Now click on the *polls* database on the left side of the screen, then click on *More*, *Authentication*.
 
-Then click on *Add User* and enter *pollUser* as UserName, and *pollPass* as password. (passwords are case-sensitive).
+Then click on *Add User* and enter *pollUser* as UserName, and *pollPass* as Password. (passwords are case-sensitive).
 
-Now we are ready to deploy our app on the cloud. Just use stage task to prepare your deployment
+Now we are ready to deploy our app on the cloud. Just use the stage task to prepare your deployment
 
 ```bash
 play clean compile stage
@@ -94,10 +94,11 @@ That's it, you can now see your application running at:
 http://poll-yournamespace.rhcloud.com
 ```
 
-The first time you do it, it will take quite a few minutes to complete, because git has to upload play's dependencies,
-but after that git is smart enough to just upload the differences.
+The first time you push the application, it will take quite a few minutes to complete, because git has to upload play's
+dependencies, but after that git is smart enough to just upload the differences.
 
-To deploy your changes, you can just repeat the steps from play stage, or use the helper script 'openshift_deploy'.
+To deploy your changes, you can just repeat the steps from *play clean compile stage*, or use the helper script
+'openshift_deploy'.
 
 *NOTE* this application is currently configured to use the current stable version of play framework: version 2.0.1.
 In case you decide to go with another version be sure to update *project/plugins.sbt* and *project/build.properties*
