@@ -80,22 +80,31 @@ object Application extends Controller with TwitterAuth {
   }
 
   def tweetPoll(id: ObjectId) = AuthenticatedAction { implicit request =>
-    val pollUrl = routes.Application.answerForm(id).absoluteURL()
-    val status = URLEncoder.encode("Poll %s".format(pollUrl), "UTF-8")
-    val promise = WS.url("https://api.twitter.com/1/statuses/update.json?status=%s".format(status)).sign(
-      OAuthCalculator(TwitterAuthenticator.KEY,
-        RequestToken(request.user.token, request.user.secret))).post("")
-        promise.await(10000).fold(
-      onError => {
-        Logger.error("Error sending poll to twitter")
-        Redirect(routes.Application.myPolls()).flashing("error" -> "There was an error sharing your poll on Twitter")
-      },
-      response =>
-      {
-        Logger.debug("response: " + response.body)
-        Redirect(routes.Application.myPolls()).flashing("success" -> "Your poll has been tweeted")
-      }
-    )
+
+    def truncateQuestion(question: String) = {
+      val MAX_QUESTION_LEN = 100
+      question.slice(0, MAX_QUESTION_LEN) + (if (question.size > MAX_QUESTION_LEN) "…" else "")
+    }
+
+    Polls.byId(id).map { poll =>
+      val pollUrl = routes.Application.answerForm(id).absoluteURL()
+      val status = URLEncoder.encode("twitterPoll %s %s".format(truncateQuestion(poll.question), pollUrl), "UTF-8")
+
+      val promise = WS.url("https://api.twitter.com/1/statuses/update.json?status=%s".format(status)).sign(
+        OAuthCalculator(TwitterAuthenticator.KEY,
+          RequestToken(request.user.token, request.user.secret))).post("")
+          promise.await(10000).fold(
+        onError => {
+          Logger.error("Error sending poll to twitter")
+          Redirect(routes.Application.myPolls()).flashing("error" -> "There was an error sharing your poll on Twitter")
+        },
+        response => {
+          Logger.debug("response: " + response.body)
+          Redirect(routes.Application.myPolls()).flashing("success" -> "Your poll has been tweeted")
+        }
+      )
+    }.getOrElse(NotFound)
+
   }
 
 }
